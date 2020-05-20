@@ -6,25 +6,22 @@ import android.content.ClipData;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
-import android.view.DragEvent;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -45,12 +42,30 @@ public class MainActivity extends AppCompatActivity {
     private AppAdapter installedAppAdapter;
     GridView userInstalledApps;
     private static int loadHomepage = 1;
+    private ScaleGestureDetector mScaleGestureDetector;
+    private float mScaleFactor = 1.0f;
+    private View grid_element;
+
+    // layout-urile pe care se vor face modificarile
+    RelativeLayout AppListLayout;
+    RelativeLayout HomeLayout;
+
+    public RelativeLayout getAppListLayout(){
+        return AppListLayout;
+    }
+    public RelativeLayout getHomeLayout(){
+        return HomeLayout;
+    }
+
+    // parametrii pt lista de aplicatii
+    RelativeLayout.LayoutParams param_list_show = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
+    RelativeLayout.LayoutParams param_list_hide = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, 0);
+    // parametrii pentru homepage
+    RelativeLayout.LayoutParams param_home_show = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
+    RelativeLayout.LayoutParams param_home_hide = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, 0);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        View homeContainer = (View) findViewById(R.id.viewpager_layout);
-        View AppListContainer = (View) findViewById(R.id.app_list_layout);
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -79,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
                                     }
                                 }
                                 if (which==1){
-                                    Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                    Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
                                     intent.setData(Uri.parse("package:" + installedApps.get(i).packages));
                                     Toast.makeText(MainActivity.this, installedApps.get(i).packages, Toast.LENGTH_SHORT).show();
                                     startActivity(intent);
@@ -91,25 +106,46 @@ public class MainActivity extends AppCompatActivity {
         });
 
         onSwipeHomepage = new OnSwipeTouchListener(this, findViewById(R.id.viewpager));
-        onSwipeHomepage = new OnSwipeTouchListener(this, findViewById(R.id.installed_app_list));
+        //onSwipeHomepage = new OnSwipeTouchListener(this, findViewById(R.id.installed_app_list));
+
+        //userInstalledApps.setOnTouchListener(new MyTouchListener());
+        //findViewById(R.id.app_list_layout).setOnDragListener(new MyDragListener());
+
         ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
         viewPager.setAdapter(new CustomPagerAdapter(this));
         View homepage = (View) findViewById(R.id.viewpager);
+
+        HomeLayout = findViewById(R.id.viewpager_layout);
+        AppListLayout = findViewById(R.id.app_list_layout);
+        grid_element = findViewById(R.id.grid1_1);
+
+        mScaleGestureDetector = new ScaleGestureDetector(this, new ScaleListener());
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent motionEvent) {
+        mScaleGestureDetector.onTouchEvent(motionEvent);
+        return true;
     }
 
     @Override
     public void onBackPressed(){
-        // layout-urile pe care se vor face modificarile
-        RelativeLayout AppListLayout = (RelativeLayout) findViewById(R.id.app_list_layout);
-        RelativeLayout HomeLayout = (RelativeLayout) findViewById(R.id.viewpager_layout);
-        // parametrii pt lista de aplicatii
-        RelativeLayout.LayoutParams param_list_hide = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, 0);
-        // parametrii pentru homepage
-        RelativeLayout.LayoutParams param_home_show = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
         if(loadHomepage == 0){
             AppListLayout.setLayoutParams(param_list_hide);
             HomeLayout.setLayoutParams(param_home_show);
             loadHomepage = 1;
+        }
+    }
+
+    private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
+        @Override
+        public boolean onScale(ScaleGestureDetector scaleGestureDetector){
+            mScaleFactor *= scaleGestureDetector.getScaleFactor();
+            mScaleFactor = Math.max(0.1f,
+                    Math.min(mScaleFactor, 10.0f));
+            grid_element.setScaleX(mScaleFactor);
+            grid_element.setScaleY(mScaleFactor);
+            return true;
         }
     }
 
@@ -154,7 +190,7 @@ public class MainActivity extends AppCompatActivity {
             }
             listViewHolder.textInListView.setText(listStorage.get(position).getName());
             listViewHolder.imageInListView.setImageDrawable(listStorage.get(position).getIcon());
-
+            convertView.setOnTouchListener(new MyTouchListener());
             return convertView;
         }
 
@@ -165,7 +201,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private boolean isSystemPackage(PackageInfo pkgInfo) {
-        return (pkgInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0;
+        String standard_package = "com.android";
+        String package_info = pkgInfo.packageName;
+        String[] package_string_array = package_info.split("\\.");
+        if(package_string_array.length < 2){
+            return true;
+        }else{
+            String package_source = package_string_array[0] + "." + package_string_array[1];
+            return standard_package.equals(package_source);
+        }
+        //return (pkgInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0;
     }
 
     private List<AppList> getInstalledApps() {
@@ -203,17 +248,6 @@ public class MainActivity extends AppCompatActivity {
         private final GestureDetector gestureDetector;
         private StatusBarManager statusbar;
         onSwipeListener onSwipe;
-
-        // layout-urile pe care se vor face modificarile
-        RelativeLayout AppListLayout = (RelativeLayout) findViewById(R.id.app_list_layout);
-        RelativeLayout HomeLayout = (RelativeLayout) findViewById(R.id.viewpager_layout);
-        // parametrii pt lista de aplicatii
-        RelativeLayout.LayoutParams param_list_show = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
-        RelativeLayout.LayoutParams param_list_hide = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, 0);
-        // parametrii pentru homepage
-        RelativeLayout.LayoutParams param_home_show = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
-        RelativeLayout.LayoutParams param_home_hide = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, 0);
-
         Context context;
         OnSwipeTouchListener(Context ctx, View mainView) {
             gestureDetector = new GestureDetector(ctx, new GestureListener());
@@ -287,8 +321,6 @@ public class MainActivity extends AppCompatActivity {
             if(MainActivity.loadHomepage == 1){
                 // daca este pe homepage, se afiseaza bara de notificari
                 expandPanel(context);
-            }else{
-                // daca nu este pe homepage, atunci se inchide lista de aplicatii si se afiseaza cea de homepage
             }
             this.onSwipe.swipeBottom();
         }
@@ -325,51 +357,17 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private final class MyTouchListener implements View.OnTouchListener {
+    public final class MyTouchListener implements View.OnTouchListener {
         public boolean onTouch(View view, MotionEvent motionEvent) {
-            if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+            if (motionEvent.getAction() == MotionEvent.ACTION_MOVE) {
                 ClipData data = ClipData.newPlainText("", "");
-                View.DragShadowBuilder shadowBuilder = new View.DragShadowBuilder(
-                        view);
+                View.DragShadowBuilder shadowBuilder = new View.DragShadowBuilder(view);
                 view.startDrag(data, shadowBuilder, view, 0);
                 view.setVisibility(View.INVISIBLE);
                 return true;
             } else {
                 return false;
             }
-        }
-    }
-
-    class MyDragListener implements View.OnDragListener {
-
-        @Override
-        public boolean onDrag(View v, DragEvent event) {
-            View view;
-            int action = event.getAction();
-            switch (event.getAction()) {
-                case DragEvent.ACTION_DRAG_STARTED:
-                    // do nothing
-                    break;
-                case DragEvent.ACTION_DRAG_ENTERED:
-                    break;
-                case DragEvent.ACTION_DRAG_EXITED:
-                    break;
-                case DragEvent.ACTION_DROP:
-                    // Dropped, reassign View to ViewGroup
-                    view = (View) event.getLocalState();
-                    ViewGroup owner = (ViewGroup) view.getParent();
-                    owner.removeView(view);
-                    LinearLayout container = (LinearLayout) v;
-                    container.addView(view);
-                    view.setVisibility(View.VISIBLE);
-                    break;
-                case DragEvent.ACTION_DRAG_ENDED:
-                    view = (View) event.getLocalState();
-                    view.setVisibility(View.VISIBLE);
-                default:
-                    break;
-            }
-            return true;
         }
     }
 }

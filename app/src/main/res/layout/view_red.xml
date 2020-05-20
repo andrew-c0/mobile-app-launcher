@@ -4,70 +4,74 @@
     android:background="@android:color/holo_red_light"
     android:layout_height="match_parent">
 
-    <GridView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:numColumns="4">
-        <LinearLayout
-            android:layout_width="70dp"
-            android:layout_height="70dp"></LinearLayout>
-        <LinearLayout
-            android:layout_width="70dp"
-            android:layout_height="70dp"></LinearLayout>
-        <LinearLayout
-            android:layout_width="70dp"
-            android:layout_height="70dp"></LinearLayout>
-        <LinearLayout
-            android:layout_width="70dp"
-            android:layout_height="70dp"></LinearLayout>
-        <LinearLayout
-            android:layout_width="70dp"
-            android:layout_height="70dp"></LinearLayout>
-        <LinearLayout
-            android:layout_width="70dp"
-            android:layout_height="70dp"></LinearLayout><LinearLayout
-        android:layout_width="70dp"
-        android:layout_height="70dp"></LinearLayout>
-        <LinearLayout
-            android:layout_width="70dp"
-            android:layout_height="70dp"></LinearLayout><LinearLayout
-        android:layout_width="70dp"
-        android:layout_height="70dp"></LinearLayout>
-        <LinearLayout
-            android:layout_width="70dp"
-            android:layout_height="70dp"></LinearLayout><LinearLayout
-        android:layout_width="70dp"
-        android:layout_height="70dp"></LinearLayout>
-        <LinearLayout
-            android:layout_width="70dp"
-            android:layout_height="70dp"></LinearLayout><LinearLayout
-        android:layout_width="70dp"
-        android:layout_height="70dp"></LinearLayout>
-        <LinearLayout
-            android:layout_width="70dp"
-            android:layout_height="70dp"></LinearLayout><LinearLayout
-        android:layout_width="70dp"
-        android:layout_height="70dp"></LinearLayout>
-        <LinearLayout
-            android:layout_width="70dp"
-            android:layout_height="70dp"></LinearLayout><LinearLayout
-        android:layout_width="70dp"
-        android:layout_height="70dp"></LinearLayout>
-        <LinearLayout
-            android:layout_width="70dp"
-            android:layout_height="70dp"></LinearLayout><LinearLayout
-        android:layout_width="70dp"
-        android:layout_height="70dp"></LinearLayout>
-        <LinearLayout
-            android:layout_width="70dp"
-            android:layout_height="70dp"></LinearLayout>
+        android:id="@+id/first_screen_homepage"
+        android:orientation="horizontal">
+        <View
+            android:id="@+id/grid1_1"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_margin="10dp"
+            android:background="@android:color/holo_green_light">
+        </View>
+        <View
+            android:id="@+id/grid1_2"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_margin="10dp"
+            android:background="@android:color/holo_blue_light">
+        </View>
+        <View
+            android:id="@+id/grid1_3"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_margin="10dp"
+            android:background="@android:color/holo_purple">
+        </View>
+    </LinearLayout>
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="First View"
+        android:layout_gravity="center_horizontal"
+        android:textSize="28sp"
+        android:textColor="@android:color/black"
+        android:textStyle="bold"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/textView" />
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:layout_gravity="center_horizontal"
+        android:textSize="20sp"
+        android:textColor="@android:color/black"
+        android:textStyle="bold"
+        android:minLines="2"
+        android:id="@+id/textView2"
+        android:padding="10dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
 
-
-
-
-
-    </GridView>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Swipe right to\nSecond View"
+        android:layout_gravity="center_horizontal"
+        android:textSize="20sp"
+        android:textColor="@android:color/black"
+        android:textStyle="bold"
+        android:padding="10dp"
+        android:minLines="2"
+        android:id="@+id/textView3"
+        android:layout_alignTop="@+id/textView2"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
 
 </RelativeLayout>

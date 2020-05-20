@@ -33,7 +33,6 @@
             android:singleLine="true"
             android:ellipsize="marquee"
             android:marqueeRepeatLimit="marquee_forever"
-            android:focusableInTouchMode="true"
             android:text="App Name"/>
     </LinearLayout>
 

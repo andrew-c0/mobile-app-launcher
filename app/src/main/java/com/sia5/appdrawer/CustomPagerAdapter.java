@@ -20,6 +20,7 @@ public class CustomPagerAdapter extends PagerAdapter {
         ModelObject modelObject = ModelObject.values()[position];
         LayoutInflater inflater = LayoutInflater.from(mContext);
         ViewGroup layout = (ViewGroup) inflater.inflate(modelObject.getLayoutResId(), collection, false);
+        //layout.setOnDragListener(new MyDragListener());
         collection.addView(layout);
         return layout;
     }
